@@ -49,14 +49,13 @@ class PersonApiView(APIView, Exception):
             documentType = request.GET.get('documentType')
             documentNumber = request.GET.get('documentNumber')
             if None in (documentType, documentNumber):
-                logger.warning({"message": "Bad Request"})
-                return Response({"status": "400", "message":  "Bad Request"}, status=status.HTTP_400_BAD_REQUEST)
+                person = Person.objects.all()
             else:
                 person = Person.objects.filter(documentType__iexact=documentType, documentNumber__iexact=documentNumber)
-                if person.exists():
-                    res = self.serializer_person(person , many=True)
-                    return Response({"status": "200", "data": res.data}, status=status.HTTP_200_OK)
-                else:
+            if person.exists():
+                res = self.serializer_person(person , many=True)
+                return Response({"status": "200", "data": res.data}, status=status.HTTP_200_OK)
+            else:
                     return Response({"status": "Successful", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)
         except (Person.DoesNotExist, AssertionError):
             return Response({"status": "204", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)

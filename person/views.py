@@ -56,29 +56,41 @@ class PersonApiView(APIView, Exception):
                 res = self.serializer_person(person , many=True)
                 return Response({"status": "200", "data": res.data}, status=status.HTTP_200_OK)
             else:
-                    return Response({"status": "Successful", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)
-        except (Person.DoesNotExist, AssertionError):
+                return Response({"status": "Successful", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)
+        except (Person.DoesNotExist, AssertionError) as e:
+            logger.info(str(e))
             return Response({"status": "204", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)
         except (KeyError, requests.RequestException) as e:
+            logger.info(str(e))
             return Response({"status": "400", "message":  str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.info(str(e))
             return Response({"status": "500", "message":  str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @swagger_auto_schema(request_body=PersonSerializer, operation_id='Create Person', responses=response_schema_dict)
     def post(self, request):
         try:
             serializer = self.serializer_person(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({"status": "200", "message": "Person created"}, status=status.HTTP_201_CREATED)
+            documentType = request.data["documentType"]
+            documentNumber = request.data["documentNumber"] 
+            person = Person.objects.filter(documentType__iexact=documentType, documentNumber=documentNumber)
+            if person.exists():
+                return Response({"status": "204", "message": "Person Exist"}, status=status.HTTP_204_NO_CONTENT)
             else:
-                logger.warning({"message": serializer.errors})
-                raise PersonApiView
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response({"status": "201", "message": "Person created"}, status=status.HTTP_201_CREATED)
+                else:
+                    logger.warning({"message": serializer.errors})
+                    raise PersonApiView
         except (PersonApiView) as e:
+            logger.info(str(e))
             return Response({"status": "422", "message": serializer.errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except (KeyError, requests.RequestException, AssertionError) as e:
+            logger.info(str(e))
             return Response({"status": "400", "message":  str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.info(str(e))
             return Response({"status": "500", "message":  str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -88,6 +100,7 @@ class PersonApiView(APIView, Exception):
             documentType = request.data["documentType"]
             documentNumber = request.data["documentNumber"]        
             if None in (documentType, documentNumber):
+                logger.info(str(e))
                 return Response({"status": "Bad Request", "message": "Bad Request"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 person = Person.objects.get(documentType__iexact=documentType, documentNumber=documentNumber)
@@ -103,8 +116,10 @@ class PersonApiView(APIView, Exception):
         except (Person.DoesNotExist):
             return Response({"status": "204", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)
         except (KeyError, AssertionError) as e:
+            logger.info(str(e))
             return Response({"status": "400", "message":  str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.info(str(e))
             return Response({"status": "500", "message":  str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -124,6 +139,8 @@ class PersonApiView(APIView, Exception):
         except (Person.DoesNotExist):
             return Response({"status": "204", "message": "NO_CONTENT"}, status=status.HTTP_204_NO_CONTENT)
         except (KeyError, AssertionError) as e:
+            logger.info(str(e))
             return Response({"status": "400", "message":  str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.info(str(e))
             return Response({"status": "500", "message":  str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

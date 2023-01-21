@@ -1,0 +1,1 @@
+/usr/local/bin/gunicorn infoManagerAPI.wsgi:application --bind "0.0.0.0:8080" --timeout 0 --threads 8

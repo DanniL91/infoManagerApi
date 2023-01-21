@@ -1,0 +1,1 @@
+./cloud_sql_proxy -instances=voltaic-quest-341402:southamerica-west1:postgrsql-persons=tcp:6543 -credential_file=C:/Users/Dannia/Music/infoManager/db/key.json

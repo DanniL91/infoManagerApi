@@ -12,55 +12,24 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os 
-from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", cast=bool)
+DEBUG = True
+
+ALLOWED_HOSTS = ['http://localhost:3000', 'http://127.0.0.1', '0.0.0.0', 'info-manager-api-naj7d6dr4q-tl.a.run.app']
 
 # Django log viewer
 LOGGING = {
-    'version': 1,
-    # Version of logging
-    'disable_existing_loggers': False,
-    #disable logging 
-    # Handlers 
-    'handlers': {
-        'file': {
-            'level': 'WARN',
-            'class': 'logging.FileHandler',
-            'filename': 'info_manager.log',
-        },
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    # Loggers 
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],
-            'level': 'WARN',
-            'propagate': True,
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARN')
-        },
-    },
+
 }
 
-ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')]
-)
-
-CORS_ORIGIN_WHITELIST = config(
-    'CORS_ORIGIN_WHITELIST', cast=lambda v: [s.strip() for s in v.split(',')]
-)
+CORS_ORIGIN_WHITELIST = ['https://person-manager-naj7d6dr4q-tl.a.run.app', 'http://181.60.37.137']
 
 # Application definition
 
@@ -112,16 +81,18 @@ WSGI_APPLICATION = 'infoManagerAPI.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+INSTANCE_CONNECTION_NAME= os.environ.get('INSTANCE_CONNECTION_NAME')
+
 DATABASES = {
     'default': {
-        'ENGINE': config("ENGINE"),
-        'NAME': config("NAME"),
-        'USER': config("USER"),
-        'PASSWORD': config("PASSWORD"),
-        'HOST': config("HOST"),
-        'PORT': config("PORT")
+        'ENGINE': os.environ.get('ENGINE'),
+        'HOST': f'/cloudsql/{INSTANCE_CONNECTION_NAME}',
+        'USER': os.environ.get('USER'),
+        'PASSWORD': os.environ.get('PASSWORD'),
+        'NAME': os.environ.get('NAME'),
     }
 }
+
 
 
 # Password validation

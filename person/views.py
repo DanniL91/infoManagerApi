@@ -98,15 +98,13 @@ class PersonApiView(APIView, Exception):
     def put(self, request):
         try:
             documentType = request.data["documentType"]
-            documentNumber = request.data["documentNumber"]        
-            if None in (documentType, documentNumber):
-                logger.info(str(e))
+            documentNumber = request.data["documentNumber"]   
+            if (request.data["first_name"]=="" or request.data["lastName"]=="" or  documentType=="" or documentNumber==""):
                 return Response({"status": "Bad Request", "message": "Bad Request"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 person = Person.objects.get(documentType__iexact=documentType, documentNumber=documentNumber)
                 serializer = self.serializer_person(person, data=request.data, partial=True)
                 if serializer.is_valid():
-                    print("nuevo")
                     serializer.validated_data['first_name'] = request.data["first_name"] 
                     serializer.validated_data['second_name'] = request.data["second_name"] 
                     serializer.validated_data['lastName'] = request.data["lastName"] 
